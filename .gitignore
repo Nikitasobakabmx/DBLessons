@@ -1,0 +1,6 @@
+#ignore word documents
+**/*.doc
+*.doc
+*.docx
+**/*.docx
+
