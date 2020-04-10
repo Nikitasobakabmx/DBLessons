@@ -3,4 +3,4 @@
 *.doc
 *.docx
 **/*.docx
-
+*.json
