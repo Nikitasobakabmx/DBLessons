@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Person
     PersonID SERIAL PRIMARY KEY NOT NULL,
     Name VARCHAR(20) NOT NULL,
     Surname VARCHAR(20),
-    Ptronumic VARCHAR(20),
+    Patronumic VARCHAR(20),
     Photo VARCHAR(150),
     Description VARCHAR(150),
     DateOfBirth DATE
@@ -45,6 +45,12 @@ CREATE TABLE IF NOT EXISTS Email
     FOREIGN KEY (PersonID) REFERENCES Person (PersonID) 
         ON DELETE CASCADE
         ON UPDATE SET DEFAULT
+);
+
+CREATE TABLE IF NOT EXISTS Patron
+(
+	id	SERIAL	PRIMARY KEY NOT NULL,
+	val	VARCHAR(30)	NOT NULL
 );
 
 ALTER TABLE Person drop column Photo;
