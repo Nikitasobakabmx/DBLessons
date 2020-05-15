@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 -- MAX TYPE 
--- clear
+-- clear++
 DROP TYPE max_type;
 DROP PROCEDURE IF EXISTS get_max_type_proc(inout ret max_type);
 DROP FUNCTION IF EXISTS  get_max_type_func();
@@ -130,12 +130,12 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE MINIMAL_APPEND_PERSON (
+CREATE OR REPLACE PROCEDURE MINIMAL_APPEND_PERSON_1 (
 	IN Iname VARCHAR(20),
 	IN Isurname VARCHAR(20) DEFAULT NULL,
 	IN Ipatronumic VARCHAR(20) DEFAULT NULL,
-	IN Imark VARCHAR(10) DEFAULT NULL,
-	IN Iphone VARCHAR(11) DEFAULT NULL
+	IN Imark VARCHAR(10) DEFAULT NULL
+	-- IN Iphone CHAR(11)
 )
 LANGUAGE plpgsql
 AS $$
@@ -160,16 +160,25 @@ BEGIN
 	SELECT INTO marka put_mark(Imark);
 	PERFORM pair_mark_person(id, marka);
 	-- pair phone
-	PERFORM put_number(id, Iphone);
+	-- PERFORM put_number(id, Iphone);
 END;
 $$;
 -- run
-CALL MINIMAL_APPEND_PERSON(
+CALL MINIMAL_APPEND_PERSON_1(
 	'Nikittoss',
 	'Khmelev', 
 	'Anatolevich',
-	'Семья',
-	'89995480802');
+	'Семья');
+
+-- CALL MINIMAL_APPEND_PERSON_1(
+-- 	'Nikittoss',
+-- 	'Khmelev', 
+-- 	'Anatolevich',
+-- 	'Семья',
+-- 	'89995480802');	
+
+SELECT * FROM Person;
+Select * from MarkSet;
 ----------------------------------------------------------------------
 -- delete full Person
 -- clear
@@ -220,7 +229,7 @@ $$;
 -- run
 call drop_person('Nikittoss', 'Khmelev');
 ----------------------------------------------------------------------
--- statistics
+-- statistics++
 -- clear
 DROP FUNCTION IF EXISTS my_statistic();
 -- realization
@@ -254,7 +263,7 @@ $$;
 -- run
 SELECT * FROM my_statistic();
 ----------------------------------------------------------------------
--- delete number and dependence
+-- delete number and dependence--
 DROP PROCEDURE IF EXISTS del_num(IN num VARCHAR(11));
 
 CREATE OR REPLACE PROCEDURE del_num(IN num VARCHAR(11))
@@ -262,17 +271,15 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
 	id int DEFAULT NULL;
-	AMOUNT int DEFAULT NULL;
 BEGIN
 	SELECT INTO id PersonID FROM Phone WHERE PhoneNumber ~~ num;
 	DELETE FROM Phone WHERE PhoneNumber ~~ num;
-	SELECT INTO AMOUNT COUNT(PersonID) FROM Phone 
-		WHERE PhoneID = id;
-	IF AMOUNT = 0
+	IF NOT EXISTS (SELECT * FROM Phone 
+		WHERE PersonID = id)
 	THEN
-		PERFORM drop_person(id);
+		DELETE FROM Person where PersonID = id;
 	END IF;
 END;
 $$;
-
+-- IFEXISTS
 CALL del_num('89995480802');
