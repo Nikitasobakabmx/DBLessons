@@ -25,7 +25,6 @@ CREATE TRIGGER name_npe BEFORE INSERT ON Person
 
 INSERT INTO Person(surname) Values ('Nikita'); -- incorect
 INSERT INTO Person(name) Values ('Nikita');    -- corect
-
 -----------------------------------------------------------------------------
 -- kascade delete ++
 -- BEFORE DELETE
@@ -47,17 +46,17 @@ $$;
 CREATE TRIGGER kascade_person BEFORE DELETE ON Person
     FOR EACH ROW
     EXECUTE PROCEDURE kascade_person();
-
-CALL MINIMAL_APPEND_PERSON_1(
+-- test
+CALL MINIMAL_APPEND_PERSON(
 	'Nikittoss',
 	'Khmelev', 
 	'Anatolevich',
 	'Семья',
 	'89995480802');	
-
+delete from Person where PersonID = currval(pg_get_serial_sequence(
+			'Person', 'personid'));
 -----------------------------------------------------------------------------
 -- Check Phone ++
-
 -- BEFORE INSERT AND UPDATE
 DROP TRIGGER IF EXISTS Check_phone ON Phone;
 DROP FUNCTION IF EXISTS Check_phone();
@@ -79,7 +78,8 @@ CREATE TRIGGER Check_phone BEFORE INSERT OR UPDATE ON Phone
     FOR EACH ROW
     EXECUTE PROCEDURE Check_phone();
 
-Insert INTO Phone(PersonID, PhoneNumber) VALUES(3, '89995480802');
+Insert INTO Phone(PersonID, PhoneNumber) VALUES(3, '89995480802'); --correct
+Insert INTO Phone(PersonID, PhoneNumber) VALUES(3, '88995480802'); --incorrect
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS my_log(
 
 -----------------------------------------------------------------------------
 -- loging Person ++
--- After ALL
+-- After INSERT
 DROP TRIGGER IF EXISTS loging ON Person;
 DROP FUNCTION IF EXISTS Loging();
 
@@ -143,7 +143,7 @@ $$;
 CREATE TRIGGER loging AFTER INSERT OR UPDATE OR DELETE ON Person
     FOR EACH ROW
     EXECUTE PROCEDURE Loging();
-
+-- need start first
 -----------------------------------------------------------------------------
 -- clear mark ++
 -- AFTER DELETE
@@ -169,7 +169,38 @@ $$;
 CREATE TRIGGER clear_mark AFTER DELETE ON MarkSet
     FOR EACH ROW
     EXECUTE PROCEDURE clear_mark();
-
+-- test
+CALL MINIMAL_APPEND_PERSON_1(
+	'Nikittoss',
+	'Khmelev', 
+	'Anatolevich',
+	'Никто',
+	'89995480802');
+delete from Person where PersonID = currval(pg_get_serial_sequence(
+			'Person', 'personid'));
 -----------------------------------------------------------------------------
--- clear mark ++
+-- check mark ++
 -- AFTER UPDATE
+DROP TRIGGER IF EXISTS check_mark ON Mark;
+DROP FUNCTION IF EXISTS check_mark();
+
+CREATE OR REPLACE FUNCTION check_mark()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF OLD.MarkID != NEW.MarkID
+    THEN
+        UPDATE MarkSet SET MarkID = NEW.MarkID 
+            WHERE MarkID = OLD.MarkID;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER check_mark AFTER UPDATE ON Mark
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_mark();
+-- test
+UPDATE Mark SET MarkID = 7 WHERE MarkID = 3;
+UPDATE Mark SET MarkID = 3 WHERE MarkID = 7;

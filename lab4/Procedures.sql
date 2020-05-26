@@ -130,12 +130,12 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE MINIMAL_APPEND_PERSON_1 (
+CREATE OR REPLACE PROCEDURE MINIMAL_APPEND_PERSON (
 	IN Iname VARCHAR(20),
 	IN Isurname VARCHAR(20) DEFAULT NULL,
 	IN Ipatronumic VARCHAR(20) DEFAULT NULL,
-	IN Imark VARCHAR(10) DEFAULT NULL
-	-- IN Iphone CHAR(11)
+	IN Imark VARCHAR(10) DEFAULT NULL,
+	IN Iphone VARCHAR(11) DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -160,7 +160,7 @@ BEGIN
 	SELECT INTO marka put_mark(Imark);
 	PERFORM pair_mark_person(id, marka);
 	-- pair phone
-	-- PERFORM put_number(id, Iphone);
+	PERFORM put_number(id, Iphone);
 END;
 $$;
 -- run
@@ -283,3 +283,11 @@ END;
 $$;
 -- IFEXISTS
 CALL del_num('89995480802');
+
+DROP PROCEDURE IF EXISTS MINIMAL_APPEND_PERSON (
+	IN name VARCHAR(20),
+	IN surname VARCHAR(20),
+	IN patronumic VARCHAR(20),
+	IN mark VARCHAR(10),
+	IN phone CHAR(11)
+);
