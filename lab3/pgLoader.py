@@ -7,8 +7,6 @@ import random
 
 class pgLoader:
 
-
-
     def __init__(self):
         self.list_of_object = list()
         with open("people.json", "r") as read:
@@ -82,11 +80,6 @@ class pgLoader:
         self.count += 1
 
     async def catch_and_push(self):
-        # loop = asyncio.new_event_loop()
-        # tasks = [loop.create_task(self.push_once(i)
-        #                           for i in self.list_of_object)]
-        # loop.run_until_complete(tasks)
-        # loop.close()
         # # # maybe this work async # # #
         tasks = [await self.push_once(i) for i in self.list_of_object]
         return tasks
@@ -96,9 +89,8 @@ class pgLoader:
         print("disconect")
 
     async def main(self):
-        #rubish
         await self.connect()
-        # await self.init_mark()
+        await self.init_mark()
         await self.catch_and_push()
         await self.detatch()
 
@@ -107,5 +99,3 @@ if __name__ == "__main__":
     pg = pgLoader()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(pg.main())
-    # asyncio.run(pg.connect())
-    # pg.catch_and_push()
